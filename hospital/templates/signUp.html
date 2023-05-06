@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="card rounded-0">
+                    <div class="card-header">
+                        <h3 class="mb-0">Sign Up</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="{% url 'register' %}" method="post">
+                            {% csrf_token %}
+                            {{ userForm.as_p }}
+                            {{ doctorForm.as_p }}
+                            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
