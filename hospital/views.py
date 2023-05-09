@@ -1,8 +1,9 @@
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView
 
 from .forms import DoctorForm, PatientForm
@@ -16,52 +17,43 @@ def sign_up_page(request):
     return render(request, 'SignUp/sign_up_as.html')
 
 
-class SignUpDoctorView(CreateView):
+class ProfileSignupView(CreateView):
+    form_class = UserCreationForm
+    success_url = reverse_lazy('hospital:success_page')
+    profile_form_key = None
+    group_name = None
+    second_form_class = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.profile_form_key not in context:
+            context[self.profile_form_key] = self.second_form_class()
+        return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        profile_form = self.second_form_class(self.request.POST, instance=self.object)
+        if profile_form.is_valid():
+            profile = profile_form.save(commit=False)
+            profile.user = self.object
+            profile.save()
+            group, _ = Group.objects.get_or_create(name=self.group_name)
+            group.user_set.add(profile)
+        return response
+
+
+class SignUpDoctorView(ProfileSignupView):
     template_name = 'SignUp/doctor_sign_up.html'
-    form_class = UserCreationForm
     second_form_class = DoctorForm
-    success_url = reverse_lazy('hospital:success_page')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if "doctorForm" not in context:
-            context["doctorForm"] = self.second_form_class()
-        return context
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        doctorForm = self.second_form_class(self.request.POST, instance=self.object)
-        if doctorForm.is_valid():
-            doctor = doctorForm.save(commit=False)
-            doctor.user = self.object
-            doctor.save()
-            group, _ = Group.objects.get_or_create(name="DOCTOR")
-            group.user_set.add(doctor)
-        return response
+    profile_form_key = "doctorForm"
+    group_name = "DOCTOR"
 
 
-class SignUpPatientView(CreateView):
+class SignUpPatientView(ProfileSignupView):
     template_name = 'SignUp/patient_sign_up.html'
-    form_class = UserCreationForm
     second_form_class = PatientForm
-    success_url = reverse_lazy('hospital:success_page')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if "patientForm" not in context:
-            context["patientForm"] = self.second_form_class()
-        return context
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        patientForm = self.second_form_class(self.request.POST, instance=self.object)
-        if patientForm.is_valid():
-            patient = patientForm.save(commit=False)
-            patient.user = self.object
-            patient.save()
-            group, _ = Group.objects.get_or_create(name="PATIENT")
-            group.user_set.add(patient)
-        return response
+    profile_form_key = "patientForm"
+    group_name = "PATIENT"
 
 
 class SignUpAdminView(CreateView):
@@ -79,3 +71,11 @@ class SignUpAdminView(CreateView):
 
     def form_invalid(self, form):
         return render(self.request, self.template_name, {'form': form})
+
+
+class ListUsersByGroup(View):
+    def get(self, request):
+        admins = User.objects.filter(groups__name='ADMIN')
+        doctors = User.objects.filter(groups__name='DOCTOR')
+        patients = User.objects.filter(groups__name='PATIENT')
+        return render(request, 'display_users.html', {'admins': admins, 'doctors': doctors, 'patients': patients})

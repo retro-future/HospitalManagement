@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <h3 class="mb-5">All users </h3>
+            <div class="col-md-4 text-center">
+                <h1>Admins</h1>
+                {% for admin in admins %}
+                    <p>{{ admin.username }}</p>
+                {% endfor %}
+            </div>
+            <div class="col-md-4 text-center">
+                <h1>Doctors</h1>
+                {% for doctor in doctors %}
+                    <p>{{ doctor.username }}</p>
+                {% endfor %}
+            </div>
+            <div class="col-md-4 text-center">
+                <h1>Patients</h1>
+                {% for patient in patients %}
+                    <p>{{ patient.username }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

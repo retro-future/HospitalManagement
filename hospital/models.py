@@ -29,3 +29,13 @@ class Patient(models.Model):
     profile_pic = models.ImageField(upload_to='profile_pic/PatientProfilePic/', null=True, blank=True)
     phone = models.CharField(max_length=20, null=True)
 
+
+class Appointment(models.Model):
+    doctor = models.OneToOneField(Doctor, on_delete=models.CASCADE)
+    patient = models.OneToOneField(Patient, on_delete=models.CASCADE)
+    date = models.DateField(auto_now=True)
+    patientName = models.CharField(max_length=100)
+    doctorName = models.CharField(max_length=100)
+    description = models.TextField(max_length=500)
+    status = models.BooleanField(default=False)
+
