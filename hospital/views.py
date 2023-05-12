@@ -4,9 +4,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView
+from django.views.generic import CreateView, ListView
 
 from .forms import DoctorForm, PatientForm
+from .models import Patient
 
 
 def success_registration(request):
@@ -15,6 +16,24 @@ def success_registration(request):
 
 def sign_up_page(request):
     return render(request, 'SignUp/sign_up_as.html')
+
+
+class PatientSignUpReview(ListView):
+    template_name = 'signup_review/patient_review.html'
+    model = Patient
+    context_object_name = 'patient_list'
+
+    def get_queryset(self):
+        return Patient.objects.filter(status=False)
+
+    def post(self, request, *args, **kwargs):
+        patient = self.model.objects.get(pk=request.POST['patient_id'])
+        if "approve" in request.POST:
+            patient.status = True
+            patient.save()
+        elif "cancel" in request.POST:
+            patient.delete()
+        return HttpResponseRedirect(reverse_lazy('hospital:patient_review'))
 
 
 class ProfileSignupView(CreateView):
