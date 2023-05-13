@@ -17,18 +17,38 @@
                 <h2>Patients list to review</h2>
                 <div class="row mt-5">
                     <div class="col-4">
-                        {% for patient in patient_list %}
-                            <form action="." method="post">
-                                {% csrf_token %}
-                                {{ patient }}
-                                <input type="hidden" name="patient_id" value="{{ patient.pk }}">
-                                <input type="submit" name="approve" value="Approve">
-                                <input type="submit" name="cancel" value="Cancel">
-                            </form>
-                        {% endfor %}
+                        <div class="list-group" id="list-tab" role="tablist">
+                            {% for patient in patient_list %}
+                                <a class="list-group-item list-group-item-action" id="list-{{ patient.pk }}-list"
+                                   data-bs-toggle="list" href="#list-{{ patient.pk }}" role="tab"
+                                   aria-controls="list-{{ patient.pk }}">{{ patient }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-8">
+
+                        <div class="tab-content" id="nav-tabContent">
+                            {% for patient in patient_list %}
+                                <div class="tab-pane fade show" id="list-{{ patient.pk }}" role="tabpanel"
+                                     aria-labelledby="list-{{ patient.pk }}-list">
+                                    <p>User - {{ patient }}</p>
+                                    <button class="btn btn-success"
+                                            onclick="sendAjaxData({{ patient.pk }}, 'approve')">Approve
+                                    </button>
+                                    <button class="btn btn-danger"
+                                            onclick="sendAjaxData({{ patient.pk }}, 'cancel')">Cancel
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        const patient_review_url = "{% url "hospital:patient_review" %}";
+        const csrf_token = '{{ csrf_token }}';
+    </script>
 {% endblock content %}

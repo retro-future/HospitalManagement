@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group, User
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import View
@@ -26,14 +26,23 @@ class PatientSignUpReview(ListView):
     def get_queryset(self):
         return Patient.objects.filter(status=False)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if "patient_review_url" not in context:
+            context["patient_review_url"] = reverse_lazy('hospital:patient_review')
+        return context
+
     def post(self, request, *args, **kwargs):
-        patient = self.model.objects.get(pk=request.POST['patient_id'])
-        if "approve" in request.POST:
+        action = request.POST.get('action')
+        user_id = request.POST.get('user_id')
+        if action == 'approve':
+            patient = Patient.objects.get(pk=user_id)
             patient.status = True
             patient.save()
-        elif "cancel" in request.POST:
+        elif action == 'cancel':
+            patient = Patient.objects.get(pk=user_id)
             patient.delete()
-        return HttpResponseRedirect(reverse_lazy('hospital:patient_review'))
+        return JsonResponse({"success": True})
 
 
 class ProfileSignupView(CreateView):
@@ -51,14 +60,14 @@ class ProfileSignupView(CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        profile_form = self.second_form_class(self.request.POST, instance=self.object)
+        profile_form = self.second_form_class(self.request.POST, self.request.FILES)
         if profile_form.is_valid():
             profile = profile_form.save(commit=False)
             profile.user = self.object
-            profile.save()
+            profile_form.save()
             group, _ = Group.objects.get_or_create(name=self.group_name)
-            group.user_set.add(profile)
-        return response
+            group.user_set.add(self.object)
+            return response
 
 
 class SignUpDoctorView(ProfileSignupView):
@@ -81,11 +90,9 @@ class SignUpAdminView(CreateView):
     success_url = reverse_lazy('hospital:success_page')
 
     def form_valid(self, form):
-        admin = form.save(commit=False)
-        admin.set_password(admin.password)
-        admin.save()
+        form.save()
         group, _ = Group.objects.get_or_create(name="ADMIN")
-        group.user_set.add(admin)
+        group.user_set.add(self.object)
         return HttpResponseRedirect(reverse_lazy('hospital:success_page'))
 
     def form_invalid(self, form):
