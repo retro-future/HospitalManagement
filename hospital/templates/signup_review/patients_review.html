@@ -1,18 +1,6 @@
-{% extends "base.html" %}
+{% extends "signup_review/base_review.html" %}
 
-{% block content %}
-    <div class="container-fluid">
-        <div class="row content vh-100">
-            <div class="col-sm-2 sidenav">
-                <h4>User Information</h4>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item active">Name: John Doe</li>
-                    <li class="list-group-item">Age: 30</li>
-                    <li class="list-group-item">Location: New York, USA</li>
-                </ul>
-                <br>
-            </div>
-
+{% block users_list %}
             <div class="col-sm-10">
                 <h2>Patients list to review</h2>
                 <div class="row mt-5">
@@ -44,11 +32,7 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
     <script>
-        const patient_review_url = "{% url "hospital:patient_review" %}";
-        const csrf_token = '{{ csrf_token }}';
+        const review_url = "{% url "hospital:patients_review" %}";
     </script>
-{% endblock content %}
+{% endblock users_list %}

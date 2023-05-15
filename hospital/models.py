@@ -4,6 +4,18 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class AbstractProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    address = models.CharField(max_length=255)
+    profile_pic = models.ImageField(upload_to='profile_pic/ProfilePictures/', null=True, blank=True,
+                                    default="profile_pic/default.jpg")
+    phone = models.CharField(max_length=20, null=True)
+    admitDate = models.DateField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
 class Specialization(Enum):
     CARDIOLOGIST = 'Cardiologist'
     DERMATOLOGIST = 'Dermatologist'
@@ -15,28 +27,23 @@ class Specialization(Enum):
         return [(key.value, key.name) for key in cls]
 
 
-class Doctor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    address = models.CharField(max_length=255)
-    profile_pic = models.ImageField(upload_to='profile_pic/DoctorProfilePic/', null=True, blank=True)
-    phone = models.CharField(max_length=20, null=True)
+class Doctor(AbstractProfile):
     specialization = models.CharField(max_length=100, choices=Specialization.choices())
-    admitDate = models.DateField(auto_now=True)
     status = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
 
 
-class Patient(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    address = models.CharField(max_length=255)
-    profile_pic = models.ImageField(upload_to='profile_pic/PatientProfilePic/', null=True, blank=True)
-    phone = models.CharField(max_length=20, null=True)
+class Patient(AbstractProfile):
     symptoms = models.CharField(max_length=150)
-    admitDate = models.DateField(auto_now=True)
     status = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.user.username
+
+
+class Administrator(AbstractProfile):
     def __str__(self):
         return self.user.username
 
@@ -48,4 +55,3 @@ class Patient(models.Model):
 #     doctorName = models.CharField(max_length=100)
 #     description = models.TextField(max_length=500)
 #     status = models.BooleanField(default=False)
-

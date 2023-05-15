@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <h3 class="mb-5">Review: </h3>
+            <div class="col-md-4 text-center">
+                <a href="{% url "hospital:doctors_review" %}">Doctor</a>
+            </div>
+            <div class="col-md-4 text-center">
+                <a href="{% url "hospital:patients_review" %}">Patient</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

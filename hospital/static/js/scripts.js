@@ -30,7 +30,7 @@ async function sendAjaxData(user_id, action) {
             user_id: user_id,
             action: action,
         };
-        const response = await postData(patient_review_url, data);
+        const response = await postData(review_url, data);
         if (response.ok){
             await removeElements(user_id);
         }

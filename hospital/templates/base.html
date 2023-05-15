@@ -31,9 +31,21 @@
             </ul>
         </div>
         <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="#"><span class="bi bi-person-fill"></span> Sign Up</a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><span class="bi bi-box-arrow-in-right"></span> Login</a>
-            </li>
+            {% if user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link" href="#"><span
+                        class="bi bi-person-fill"></span>{{ user.username }}</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="{% url "logout" %}"><span
+                        class="bi bi-box-arrow-in-right"></span>Logout</a>
+                </li>
+            {% else %}
+                <li class="nav-item"><a class="nav-link" href="{% url "hospital:register" %}"><span
+                        class="bi bi-person-fill"></span>Sign Up</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="{% url "login" %}"><span
+                        class="bi bi-box-arrow-in-right"></span>Login</a>
+                </li>
+            {% endif %}
         </ul>
     </div>
 </nav>
@@ -43,16 +55,6 @@
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
         crossorigin="anonymous"></script>
 
-<script>
-  var triggerTabList = [].slice.call(document.querySelectorAll('#list-tab a'))
-  triggerTabList.forEach(function (triggerEl) {
-    var tabTrigger = new bootstrap.Tab(triggerEl)
-    triggerEl.addEventListener('click', function (event) {
-      event.preventDefault()
-      tabTrigger.show()
-    })
-  })
-</script>
 <script src="{% static 'js/scripts.js' %}"></script>
 </body>
 
